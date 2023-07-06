@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="per.zpp.mapper.MenuMapper">
+    <insert id="addMenu">
+        insert into sys_menu
+        values (null, #{pid}, #{title}, #{href}, #{spread}, null, #{icon})
+    </insert>
+    <update id="updateMenu">
+        update sys_menu
+        <set>
+            <if test="pid!=null">
+                pid = #{pid},
+            </if>
+            <if test="spread!=null">
+                spread = #{spread},
+            </if>
+            <if test="title!=null and title!=''">
+                title = #{title},
+            </if>
+            <if test="href!=null and href!=''">
+                href = #{href},
+            </if>
+            <if test="target!=null and target!=''">
+                target = #{target},
+            </if>
+            <if test="icon!=null and icon!=''">
+                icon = #{icon},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="deleteMenuById">
+        delete from sys_menu where id=#{id}
+    </delete>
+
+
+    <select id="findMenuList" resultType="per.zpp.domain.Menu">
+        select *
+        from sys_menu
+    </select>
+    <select id="findMenuIdListByRoleId" resultType="java.lang.Integer">
+        select mid
+        from sys_role_menu
+        where rid = #{roleId}
+    </select>
+    <!--    select * from sys where id= (1,3,5,7)  参数类型是集合 所以 collection填 list
+      如果参数类型是数组 则填 array-->
+    <select id="findMenuByMenuId" resultType="per.zpp.domain.Menu">
+        select *from sys_menu where id in
+        <foreach collection="list" item="menuIds" open="(" separator="," close=")">
+            #{menuIds}
+        </foreach>
+    </select>
+    <select id="findMenuListByPage" resultType="per.zpp.domain.Menu">
+        select * from sys_menu
+        <where>
+            <if test="id!=null">
+                and id = #{id} or pid = #{id}
+            </if>
+        </where>
+        order by id
+    </select>
+    <select id="getMenuCountByMenuId" resultType="java.lang.Integer">
+        select count(1) from sys_menu where pid=#{id}
+    </select>
+    <select id="findMenuListByEmployeeId" resultType="per.zpp.domain.Menu">
+        select distinct t1.* from sys_menu t1
+                                      inner join sys_role_menu t2 on t2.`mid` = t1.`id`
+                                      inner join sys_role_employee t3 on t3.`rid` = t2.`rid`
+        where t3.`eid` = #{employeeId}
+    </select>
+<!--    distinct去掉重复的数据-->
+</mapper>
